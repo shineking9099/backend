@@ -1,0 +1,5 @@
+@keyframes gradientBG {
+  0% { background: linear-gradient(45deg, #FFDEE9, #B5FFFC); }
+  50% { background: linear-gradient(45deg, #FFC3A0); }
+  100% { background: linear-gradient(45deg, #FFDEE9, #B5FFFC); }
+}
