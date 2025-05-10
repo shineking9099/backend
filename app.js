@@ -5,26 +5,26 @@ const bodyParser = require("body-parser");
 require("dotenv").config();
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(bodyParser.json());
 
 // MongoDB Connection
-mongoose.connect("mongodb://127.0.0.1:27017/ecommerce", {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 }).then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
-// Order Schema (Supports Multiple Products)
+// Order Schema
 const orderSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    address: { type: String, required: true },
-    city: { type: String, required: true },
-    phone: { type: String, required: true },
-    whatsapp: { type: String, required: true },
+    name: String,
+    email: String,
+    address: String,
+    city: String,
+    phone: String,
+    whatsapp: String,
     cartProducts: [
         {
             id: String,
@@ -32,7 +32,7 @@ const orderSchema = new mongoose.Schema({
             quantity: Number,
             new_price: Number,
             image: String,
-            total: Number, // Store total price of product (new_price * quantity)
+            total: Number,
         }
     ],
 });
@@ -44,21 +44,12 @@ app.post("/register", async (req, res) => {
     try {
         const { name, email, address, city, phone, whatsapp, cartProducts } = req.body;
 
-        // Calculate total for each product
-        const updatedCartProducts = cartProducts.map(product => ({
-            ...product,
-            total: product.new_price * product.quantity,
+        const updatedCartProducts = cartProducts.map(p => ({
+            ...p,
+            total: p.new_price * p.quantity
         }));
 
-        const newOrder = new Order({
-            name,
-            email,
-            address,
-            city,
-            phone,
-            whatsapp,
-            cartProducts: updatedCartProducts,
-        });
+        const newOrder = new Order({ name, email, address, city, phone, whatsapp, cartProducts: updatedCartProducts });
 
         await newOrder.save();
 
@@ -68,5 +59,4 @@ app.post("/register", async (req, res) => {
     }
 });
 
-// Start Server
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
